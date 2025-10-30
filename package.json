@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@lucid-dreams/agent-kit": "^0.2.22",
+    "hono": "^4.6.12",
     "node-fetch": "^3.3.2",
     "viem": "^2.38.5",
     "x402-fetch": "^0.7.0",

@@ -1,3 +1,4 @@
+import { Hono } from "hono";
 import {
   createAgentApp,
   type AgentKitConfig,
@@ -36,8 +37,7 @@ const agentConfig: AgentKitConfig = {
   payments: {
     facilitatorUrl:
       process.env.FACILITATOR_URL || "https://facilitator.daydreams.systems",
-    payTo:
-      (process.env.PAY_TO as `0x${string}`) || DEFAULT_PAY_TO_ADDRESS,
+    payTo: (process.env.PAY_TO as `0x${string}`) || DEFAULT_PAY_TO_ADDRESS,
     network: process.env.NETWORK || "base",
     defaultPrice: process.env.DEFAULT_PRICE || "0.02",
   },
@@ -348,24 +348,18 @@ const getSafeSlippageEntrypoint: EntrypointDef = {
 addEntrypoint(getSafeSlippageEntrypoint);
 
 // ============================================================================
-// Server Startup
+// Hono App Setup for Vercel
 // ============================================================================
 
+const honoApp = new Hono();
+
+// Wrap the agent app's fetch handler for Hono
+honoApp.use("*", async (c) => {
+  return app.fetch(c.req.raw);
+});
+
 const start = () => {
-  const bun = (globalThis as any).Bun;
-  if (!bun || typeof bun.serve !== "function") {
-    throw new Error("Bun runtime is required to start the agent server.");
-  }
-
-  const port = Number(process.env.PORT ?? 8787);
-  const server = bun.serve({
-    port,
-    fetch: app.fetch,
-  });
-
-  console.log(
-    `Agent ready at http://${server.hostname}:${server.port}/.well-known/agent.json`,
-  );
+  console.log("Agent ready for deployment (Hono + Vercel).");
 
   const payTo =
     process.env.PAY_TO || agentConfig.payments?.payTo || DEFAULT_PAY_TO_ADDRESS;
@@ -374,15 +368,13 @@ const start = () => {
   } else {
     console.log("⚠️  Agent is running in test mode (payments disabled).");
   }
-
-  return server;
 };
 
-const agentWithStart = Object.assign(app, {
+const agentWithStart = Object.assign(honoApp, {
   start,
   payments,
   getSafeSlippageEntrypoint,
-}) as typeof app & {
+}) as typeof honoApp & {
   start: typeof start;
   payments: typeof payments;
   getSafeSlippageEntrypoint: typeof getSafeSlippageEntrypoint;
