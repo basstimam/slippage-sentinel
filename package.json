@@ -1,0 +1,24 @@
+{
+  "name": "slippage-sentinel",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "bun src/index.ts",
+    "test": "bun test",
+    "lint": "eslint src test scripts --ext .ts",
+    "pay:call": "bun run scripts/pay-and-call.ts",
+    "manifest": "bun run scripts/generate-manifest.ts"
+  },
+  "dependencies": {
+    "@lucid-dreams/agent-kit": "^0.2.22",
+    "node-fetch": "^3.3.2",
+    "viem": "^2.38.5",
+    "x402-fetch": "^0.7.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.46.2",
+    "@typescript-eslint/parser": "^8.46.2",
+    "eslint": "^9.38.0"
+  }
+}
