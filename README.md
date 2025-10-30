@@ -1,6 +1,6 @@
 # Slippage Sentinel
 
-Estimate safe slippage tolerance for any swap route across Ethereum, Base, Arbitrum, and BNB Smart Chain—complete with pool depth analysis, trade size projections, and volatility signals.
+Estimate safe slippage tolerance for any swap route across Ethereum, Base, Arbitrum, and BNB Smart Chain. Complete with pool depth analysis, trade size projections, and volatility signals.
 
 ## Quick Start
 
