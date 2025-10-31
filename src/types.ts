@@ -39,19 +39,12 @@ export const CHAIN_MAP: Record<string, string> = {
 export const SafeSlippageInputSchema = z.object({
   token_in: z.string().min(1, "token_in is required"),
   token_out: z.string().min(1, "token_out is required"),
-  amount_in: z.union([
-    z.number().positive("amount_in must be positive"),
-    z
-      .string()
-      .min(1, "amount_in cannot be empty")
-      .transform((val) => {
-        const num = parseFloat(val);
-        if (isNaN(num) || num <= 0) {
-          throw new Error("amount_in must be a valid positive number");
-        }
-        return num;
-      }),
-  ]),
+  amount_in: z.coerce
+    .number({
+      invalid_type_error: "amount_in must be a number or numeric string",
+    })
+    .positive("amount_in must be positive")
+    .describe("Amount to trade (number or string, e.g., 10 or '10')"),
   route_hint: z.string().optional(),
 });
 
