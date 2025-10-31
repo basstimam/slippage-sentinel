@@ -9,10 +9,19 @@ type SafeSlippageInput = {
 
 const apiBaseUrl = process.env.API_BASE_URL ?? "http://localhost:8787";
 
+// Allow override via command line or environment variable
 const endpoint =
   process.argv[2] ??
   process.env.PAY_AND_CALL_ENDPOINT ??
   `${apiBaseUrl}/entrypoints/getSafeSlippage/invoke`;
+
+// Show warning if localhost is used but server might not be running
+if (endpoint.includes("localhost")) {
+  console.log(
+    "⚠️  Using localhost endpoint. Make sure server is running with 'bun run dev'",
+  );
+  console.log("💡 Or set API_BASE_URL env variable to use production URL\n");
+}
 
 const payloadArg = process.argv[3];
 
@@ -23,7 +32,7 @@ const defaultInput: SafeSlippageInput = {
   token_out:
     process.env.PAY_AND_CALL_TOKEN_OUT ??
     "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913", // USDC on Base
-  amount_in: Number(process.env.PAY_AND_CALL_AMOUNT ?? 10),
+  amount_in: Number(process.env.PAY_AND_CALL_AMOUNT ?? 1),
   route_hint: process.env.PAY_AND_CALL_ROUTE ?? "base",
 };
 
@@ -65,13 +74,38 @@ async function main() {
     console.log("📤 Sending request with payment...");
     console.log("   Input:", JSON.stringify(input, null, 2));
 
-    const response = await fetchWithPayment(endpoint, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({ input }),
-    });
+    // Retry logic for payment
+    let response: Response;
+    let attempts = 0;
+    const maxAttempts = 3;
+    const retryDelay = 2000; // 2 seconds
+
+    while (attempts < maxAttempts) {
+      attempts++;
+
+      if (attempts > 1) {
+        console.log(`\n🔄 Retry attempt ${attempts}/${maxAttempts}...`);
+        await new Promise((resolve) => setTimeout(resolve, retryDelay));
+      }
+
+      response = await fetchWithPayment(endpoint, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ input }),
+      });
+
+      // If successful or non-payment error, break
+      if (response.status === 200 || response.status !== 402) {
+        break;
+      }
+
+      // If 402 and last attempt, continue to show error
+      if (response.status === 402 && attempts < maxAttempts) {
+        console.log("   ⏳ Payment pending, retrying...");
+      }
+    }
 
     const rawBody = await response.text();
     const paymentHeader = response.headers.get("x-payment-response");

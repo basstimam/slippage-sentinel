@@ -267,7 +267,7 @@ const { app, addEntrypoint, payments } = createAgentApp(
   },
   {
     config: agentConfig,
-    useConfigPayments: true, // Enable automatic x402 payment handling
+    useConfigPayments: true, // Enable automatic x402 payment handling for consistent behavior
   },
 );
 
