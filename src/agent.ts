@@ -265,7 +265,10 @@ const { app, addEntrypoint, payments } = createAgentApp(
     version: "0.1.0",
     description: "Estimate safe slippage tolerance for any route",
   },
-  { config: agentConfig },
+  {
+    config: agentConfig,
+    useConfigPayments: true, // Enable automatic x402 payment handling
+  },
 );
 
 const getSafeSlippageEntrypoint: EntrypointDef = {
