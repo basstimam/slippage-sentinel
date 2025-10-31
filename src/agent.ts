@@ -297,13 +297,8 @@ const getSafeSlippageEntrypoint: EntrypointDef = {
         };
       }
 
-      if (!Number.isFinite(input.amount_in) || input.amount_in <= 0) {
-        return {
-          output: {
-            error: "Invalid amount_in: must be a positive number",
-          },
-        };
-      }
+      // amount_in is already validated and converted by Zod schema
+      // No need for manual validation here
 
       // Fetch pool data
       const pools = await fetchAllPools(
