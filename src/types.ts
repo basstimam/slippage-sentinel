@@ -40,9 +40,7 @@ export const SafeSlippageInputSchema = z.object({
   token_in: z.string().min(1, "token_in is required"),
   token_out: z.string().min(1, "token_out is required"),
   amount_in: z.coerce
-    .number({
-      invalid_type_error: "amount_in must be a number or numeric string",
-    })
+    .number()
     .positive("amount_in must be positive")
     .describe("Amount to trade (number or string, e.g., 10 or '10')"),
   route_hint: z.string().optional(),
